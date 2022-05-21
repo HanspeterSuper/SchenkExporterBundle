@@ -1,3 +1,5 @@
+<?php
+
 namespace KimaiPlugin\SchenkExporterBundle\DependencyInjection;
 
 use Symfony\Component\Config\FileLocator;

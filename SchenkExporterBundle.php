@@ -1,3 +1,5 @@
+<?php
+
 namespace KimaiPlugin\SchenkExporterBundle;
 
 use App\Plugin\PluginInterface;
