@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\File\MimeType\FileinfoMimeTypeGuesser;
 
 /**
- * @Route(path="/schenkexporter/{mail}:{kw}:{jahr}")
+ * @Route(path="/schenkexporter/{kw}:{jahr}")
  */
 final class SchenkExporterController extends AbstractController
 {
@@ -22,10 +22,14 @@ final class SchenkExporterController extends AbstractController
      * @param mixed $name
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function schenkexporter(string $mail, string $kw, string $jahr): Response
+    public function schenkexporter(string $kw, string $jahr): Response
     {
-        $urlToGet =  "http://schenkexporter:5000/$mail:$kw:$jahr";
-        $fileName = strtoupper(explode('.', explode('@', $mail)[0])[0][0]).strtoupper(explode('.', explode('@', $mail)[0])[1][0]).'_KW'.$kw.'_'.$jahr[2].$jahr[3].'.xlsx';
+
+        $user = $this->getUser();
+        $user = str_replace(' ', '.', $user);
+
+        $urlToGet =  "http://schenkexporter:5000/$user:$kw:$jahr";
+        $fileName = strtoupper(explode('.', $user)[0][0]).strtoupper(explode('.', $user)[1][0]).'_KW'.$kw.'_'.$jahr[2].$jahr[3].'.xlsx';
         $ch = curl_init($urlToGet);
 
         $dir = './tmp/';
