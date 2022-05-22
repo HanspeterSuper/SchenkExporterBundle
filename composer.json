@@ -1,7 +1,7 @@
 {
     "name": "serotonie/schenk-exporter-bundle",
     "description": "A plugin that convert kimai records into Schenk Wochenrapport",
-    "homepage": "https://github.com/serotonie/SchenkExporter",
+    "homepage": "https://github.com/serotonie/SchenkExporterBundle",
     "type": "kimai-plugin",
     "version": "0.1",
     "require": {
@@ -17,7 +17,7 @@
     ],
     "extra": {
         "kimai": {
-            "require": "1.3",
+            "require": "1.20",
             "version": "0.1",
             "name": "SchenkExporterBundle"
         }
