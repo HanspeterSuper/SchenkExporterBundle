@@ -30,25 +30,9 @@ final class SchenkExporterController extends AbstractController
 
         $urlToGet =  "http://schenkexporter:5000/$user:$kw:$jahr";
         $fileName = strtoupper(explode('.', $user)[0][0]).strtoupper(explode('.', $user)[1][0]).'_KW'.$kw.'_'.$jahr[2].$jahr[3].'.xlsx';
-        $ch = curl_init($urlToGet);
+        $ch = curl_init($urlToGet);  
 
-        $dir = './tmp/';
-
-        $files = glob( $dir . '*', GLOB_MARK ); 
-        foreach( $files as $file ){ 
-            if( substr( $file, -1 ) == '/' ) 
-                delTree( $file ); 
-            else 
-                unlink( $file ); 
-        } 
-    
-        if (is_dir($dir)) rmdir( $dir ); 
-
-        mkdir($dir);
-
-        $save_file_loc = $dir . $fileName;
-
-        $fp = fopen($save_file_loc, 'wb');
+        $fp = fopen($fileName, 'wb');
 
         curl_setopt($ch, CURLOPT_FILE, $fp);
         curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -59,11 +43,11 @@ final class SchenkExporterController extends AbstractController
 
         fclose($fp);
 
-        $response = new BinaryFileResponse($dir.$fileName);
+        $response = new BinaryFileResponse($fileName);
         $mimeTypeGuesser = new FileinfoMimeTypeGuesser();
         if($mimeTypeGuesser->isSupported()){
             // Guess the mimetype of the file according to the extension of the file
-            $response->headers->set('Content-Type', $mimeTypeGuesser->guess($dir.$fileName));
+            $response->headers->set('Content-Type', $mimeTypeGuesser->guess($fileName));
         }else{
             // Set the mimetype of the file manually, in this case for a text file is text/plain
             $response->headers->set('Content-Type', 'text/plain');
@@ -72,6 +56,7 @@ final class SchenkExporterController extends AbstractController
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
             $fileName
         );
+        $response->deleteFileAfterSend(true);
 
         return $response;
     }
