@@ -10,6 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\File\MimeType\FileinfoMimeTypeGuesser;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @Route(path="/schenkexporter/{kw}:{jahr}")
@@ -24,7 +25,6 @@ final class SchenkExporterController extends AbstractController
      */
     public function schenkexporter(string $kw, string $jahr): Response
     {
-
         $user = $this->getUser();
         $user = str_replace(' ', '.', $user);
 
@@ -36,28 +36,36 @@ final class SchenkExporterController extends AbstractController
 
         curl_setopt($ch, CURLOPT_FILE, $fp);
         curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_FAILONERROR, true);
 
         curl_exec($ch);
 
+        if (curl_errno($ch)){
+            $error_msg = curl_errno($ch);
+        }
         curl_close($ch);
 
         fclose($fp);
 
-        $response = new BinaryFileResponse($fileName);
-        $mimeTypeGuesser = new FileinfoMimeTypeGuesser();
-        if($mimeTypeGuesser->isSupported()){
-            // Guess the mimetype of the file according to the extension of the file
-            $response->headers->set('Content-Type', $mimeTypeGuesser->guess($fileName));
-        }else{
-            // Set the mimetype of the file manually, in this case for a text file is text/plain
-            $response->headers->set('Content-Type', 'text/plain');
+        if(isset($error_msg)){
+            throw new \Exception('Something went wrong!');
         }
-        $response->setContentDisposition(
-            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-            $fileName
-        );
-        $response->deleteFileAfterSend(true);
-
+        else{
+            $response = new BinaryFileResponse($fileName);
+            $mimeTypeGuesser = new FileinfoMimeTypeGuesser();
+            if($mimeTypeGuesser->isSupported()){
+                // Guess the mimetype of the file according to the extension of the file
+                $response->headers->set('Content-Type', $mimeTypeGuesser->guess($fileName));
+            }else{
+                // Set the mimetype of the file manually, in this case for a text file is text/plain
+                $response->headers->set('Content-Type', 'text/plain');
+            }
+            $response->setContentDisposition(
+                ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+                $fileName
+            );
+            $response->deleteFileAfterSend(true);
+        }
         return $response;
     }
 }
